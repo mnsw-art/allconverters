@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เครื่องมืออเนกประสงค์: แปลงหน่วย, คำนวณ BMI และอื่นๆ</title>
+    <!-- SEO: เพิ่ม meta description ที่เป็นคำอธิบายเว็บไซต์ให้คนและเครื่องมือค้นหาเข้าใจ -->
+    <meta name="description" content="เครื่องมืออเนกประสงค์ที่ครบครันสำหรับแปลงหน่วย, คำนวณเปอร์เซ็นต์, และคำนวณค่า BMI ใช้งานง่าย สะดวก รวดเร็ว และฟรี">
+    <meta name="keywords" content="แปลงหน่วย, คำนวณเปอร์เซ็นต์, คำนวณ BMI, เครื่องมือออนไลน์, เครื่องมือฟรี">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background: linear-gradient(135deg, #e0eafc, #cfdef3);
+            color: #334155;
+        }
+        .container {
+            max-width: 900px;
+        }
+        .converter-card {
+            background-color: white;
+            border-radius: 2rem;
+            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.1), 0 8px 16px -8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .converter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.15), 0 10px 20px -10px rgba(0, 0, 0, 0.1);
+        }
+        .tab-button {
+            transition: all 0.3s ease-in-out;
+            transform: scale(1);
+            position: relative;
+            z-index: 10;
+            color: #64748b;
+            background-color: #f1f5f9;
+        }
+        .tab-button.active {
+            transform: scale(1.05);
+            background: linear-gradient(45deg, #3b82f6, #2563eb);
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3), 0 4px 6px -2px rgba(59, 130, 246, 0.2);
+            z-index: 20;
+        }
+        .tab-button:hover:not(.active) {
+            background-color: #e2e8f0;
+            color: #3b82f6;
+            transform: scale(1.02);
+        }
+        .input-field, .output-field, select {
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+        .ad-slot {
+            height: 120px;
+            background: linear-gradient(to right, #f8fafc, #e2e8f0);
+            border: 2px dashed #94a3b8;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #94a3b8;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        /* Custom styles for the mock ad */
+        .mock-ad {
+            background-color: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            font-family: 'Sarabun', sans-serif;
+            color: #4b5563;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8 flex justify-center items-start min-h-screen">
+
+    <div class="container mx-auto p-4 sm:p-12 rounded-3xl converter-card">
+        <header class="text-center mb-12">
+            <!-- SEO: ใช้ h1 สำหรับชื่อหลักของหน้า -->
+            <h1 class="text-5xl font-bold text-slate-800 tracking-wide">เครื่องมืออเนกประสงค์</h1>
+            <p class="mt-3 text-lg text-slate-600">เครื่องมือแปลงหน่วยและคำนวณที่ครบครันสำหรับคุณ</p>
+        </header>
+
+        <main>
+            <!-- Ad Slot - Top -->
+            <!-- Note: Replace this entire div with your actual ad code from the ad network. -->
+            <div class="my-6 text-center">
+                <div class="mock-ad border-2 border-dashed border-gray-400">
+                    <p class="text-xl font-semibold text-gray-700">พื้นที่โฆษณา</p>
+                    <p class="text-sm mt-2 text-gray-500">ขนาด 728x90 พิกเซล (โค้ดโฆษณาจริงจะแสดงที่นี่)</p>
+                </div>
+            </div>
+
+            <!-- Tabs for converter selection -->
+            <div class="flex flex-wrap justify-center sm:justify-around gap-2 sm:gap-4 mb-10 p-2 bg-gray-100 rounded-full shadow-inner tab-container" role="tablist">
+                <!-- SEO: เพิ่ม title และ aria-label เพื่อการเข้าถึงและ SEO ที่ดีขึ้น -->
+                <button id="tab-length" onclick="showConverter('length', this)" class="tab-button flex-1 py-3 px-6 rounded-full font-bold text-slate-700" title="แปลงหน่วยความยาว" aria-label="แปลงหน่วยความยาว" role="tab">
+                    <i class="fas fa-ruler-horizontal mr-2"></i> ความยาว
+                </button>
+                <button id="tab-weight" onclick="showConverter('weight', this)" class="tab-button flex-1 py-3 px-6 rounded-full font-bold text-slate-700" title="แปลงหน่วยน้ำหนัก" aria-label="แปลงหน่วยน้ำหนัก" role="tab">
+                    <i class="fas fa-weight-hanging mr-2"></i> น้ำหนัก
+                </button>
+                <button id="tab-percentage" onclick="showConverter('percentage', this)" class="tab-button flex-1 py-3 px-6 rounded-full font-bold text-slate-700" title="คำนวณเปอร์เซ็นต์" aria-label="คำนวณเปอร์เซ็นต์" role="tab">
+                    <i class="fas fa-percent mr-2"></i> เปอร์เซ็นต์
+                </button>
+                <button id="tab-temperature" onclick="showConverter('temperature', this)" class="tab-button flex-1 py-3 px-6 rounded-full font-bold text-slate-700" title="แปลงอุณหภูมิ" aria-label="แปลงอุณหภูมิ" role="tab">
+                    <i class="fas fa-temperature-three-quarters mr-2"></i> อุณหภูมิ
+                </button>
+                <button id="tab-bmi" onclick="showConverter('bmi', this)" class="tab-button flex-1 py-3 px-6 rounded-full font-bold text-slate-700" title="คำนวณค่า BMI" aria-label="คำนวณค่า BMI" role="tab">
+                    <i class="fas fa-person mr-2"></i> คำนวณ BMI
+                </button>
+            </div>
+
+            <!-- Length Converter -->
+            <div id="length-converter" class="converter-section" role="tabpanel">
+                <h2 class="text-3xl font-bold text-center text-slate-700 mb-8 section-header">แปลงหน่วยความยาว</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label for="length-input" class="block text-slate-700 font-bold mb-2">ป้อนค่า:</label>
+                        <input type="number" id="length-input" oninput="convertLength()" class="input-field w-full p-3 border border-gray-300" placeholder="ตัวอย่าง: 100">
+                    </div>
+                    <div>
+                        <label for="length-from-unit" class="block text-slate-700 font-bold mb-2">จากหน่วย:</label>
+                        <select id="length-from-unit" onchange="convertLength()" class="input-field w-full p-3 border border-gray-300">
+                            <option value="km">กิโลเมตร (km)</option>
+                            <option value="m">เมตร (m)</option>
+                            <option value="cm">เซนติเมตร (cm)</option>
+                            <option value="mm">มิลลิเมตร (mm)</option>
+                            <option value="mile">ไมล์ (mile)</option>
+                            <option value="yd">หลา (yd)</option>
+                            <option value="ft">ฟุต (ft)</option>
+                            <option value="in">นิ้ว (in)</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="length-to-unit" class="block text-slate-700 font-bold mb-2">ถึงหน่วย:</label>
+                        <select id="length-to-unit" onchange="convertLength()" class="input-field w-full p-3 border border-gray-300">
+                            <option value="km">กิโลเมตร (km)</option>
+                            <option value="m">เมตร (m)</option>
+                            <option value="cm">เซนติเมตร (cm)</option>
+                            <option value="mm">มิลลิเมตร (mm)</option>
+                            <option value="mile">ไมล์ (mile)</option>
+                            <option value="yd">หลา (yd)</option>
+                            <option value="ft">ฟุต (ft)</option>
+                            <option value="in">นิ้ว (in)</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="length-output" class="block text-slate-700 font-bold mb-2">ผลลัพธ์:</label>
+                        <input type="text" id="length-output" class="output-field w-full p-3 border border-gray-300 bg-gray-100 cursor-not-allowed" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weight Converter -->
+            <div id="weight-converter" class="converter-section hidden" role="tabpanel">
+                <h2 class="text-3xl font-bold text-center text-slate-700 mb-8 section-header">แปลงหน่วยน้ำหนัก</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label for="weight-input" class="block text-slate-700 font-bold mb-2">ป้อนค่า:</label>
+                        <input type="number" id="weight-input" oninput="convertWeight()" class="input-field w-full p-3 border border-gray-300" placeholder="ตัวอย่าง: 10">
+                    </div>
+                    <div>
+                        <label for="weight-from-unit" class="block text-slate-700 font-bold mb-2">จากหน่วย:</label>
+                        <select id="weight-from-unit" onchange="convertWeight()" class="input-field w-full p-3 border border-gray-300">
+                            <option value="tonne">เมตริกตัน (tonne)</option>
+                            <option value="kg">กิโลกรัม (kg)</option>
+                            <option value="g">กรัม (g)</option>
+                            <option value="mg">มิลลิกรัม (mg)</option>
+                            <option value="lb">ปอนด์ (lb)</option>
+                            <option value="oz">ออนซ์ (oz)</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="weight-to-unit" class="block text-slate-700 font-bold mb-2">ถึงหน่วย:</label>
+                        <select id="weight-to-unit" onchange="convertWeight()" class="input-field w-full p-3 border border-gray-300">
+                            <option value="tonne">เมตริกตัน (tonne)</option>
+                            <option value="kg">กิโลกรัม (kg)</option>
+                            <option value="g">กรัม (g)</option>
+                            <option value="mg">มิลลิกรัม (mg)</option>
+                            <option value="lb">ปอนด์ (lb)</option>
+                            <option value="oz">ออนซ์ (oz)</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="weight-output" class="block text-slate-700 font-bold mb-2">ผลลัพธ์:</label>
+                        <input type="text" id="weight-output" class="output-field w-full p-3 border border-gray-300 bg-gray-100 cursor-not-allowed" readonly>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Percentage Calculator -->
+            <div id="percentage-converter" class="converter-section hidden" role="tabpanel">
+                <h2 class="text-3xl font-bold text-center text-slate-700 mb-8 section-header">คำนวณเปอร์เซ็นต์</h2>
+
+                <!-- Section: Calculate what is the percentage share -->
+                <div class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <h3 class="text-xl font-bold text-slate-700 mb-4">หาว่าตัวเลขส่วนหนึ่งคิดเป็นกี่เปอร์เซ็นต์</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+                        <div>
+                            <label for="percentage-share-input-1" class="block text-slate-700 font-bold mb-2">ป้อนตัวเลขส่วนหนึ่ง:</label>
+                            <input type="number" id="percentage-share-input-1" oninput="handlePercentageCalculations()" class="input-field w-full p-3 border border-gray-300" placeholder="ตัวอย่าง: 100">
+                        </div>
+                        <div>
+                            <label for="percentage-share-input-2" class="block text-slate-700 font-bold mb-2">ป้อนตัวเลขทั้งหมด:</label>
+                            <input type="number" id="percentage-share-input-2" oninput="handlePercentageCalculations()" class="input-field w-full p-3 border border-gray-300" placeholder="ตัวอย่าง: 200">
+                        </div>
+                        <div class="sm:col-span-2 text-center text-2xl font-bold text-slate-700 mt-4">
+                            <span id="percentage-share-output" class="text-blue-600">0</span>%
+                        </div>
+                        <div class="sm:col-span-2 mt-2">
+                            <p class="text-sm text-gray-500">ตัวอย่าง: **100** เป็นกี่เปอร์เซ็นต์ของ **200**?</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Percentage Increase/Decrease -->
+                <div class="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <h3 class="text-xl font-bold text-slate-700 mb-4">เพิ่มหรือลดค่าตามเปอร์เซ็นต์</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+                        <div>
+                            <label for="percentage-change-input" class="block text-slate-700 font-bold mb-2">ป้อนค่าตั้งต้น:</label>
+                            <input type="number" id="percentage-change-input" oninput="handlePercentageCalculations()" class="input-field w-full p-3 border border-gray-300" placeholder="ตัวอย่าง: 500">
+                        </div>
+                        <div>
+                            <label for="percentage-change-percent" class="block text-slate-700 font-bold mb-2">ป้อนเปอร์เซ็นต์ที่ต้องการเพิ่ม/ลด:</label>
+                            <input type="number" id="percentage-change-percent" oninput="handlePercentageCalculations()" class="input-field w-full p-3 border border-gray-300" placeholder="ตัวอย่าง: 10 (เพื่อเพิ่ม)">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label for="percentage-change-output" class="block text-slate-700 font-bold mb-2">ผลลัพธ์:</label>
+                            <input type="text" id="percentage-change-output" class="output-field w-full p-3 border border-gray-300 bg-gray-100 cursor-not-allowed" readonly>
+                        </div>
+                    </div>
+                    <div class="sm:col-span-2 mt-2">
+                        <p class="text-sm text-gray-500">ตัวอย่าง: **500** เพิ่มขึ้น **10%** มีค่าเท่าไหร่?</p>
+                    </div>
+                </div>
+
+                <!-- Section: Find Original Value -->
+                <div class="p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <h3 class="text-xl font-bold text-slate-700 mb-4">หาค่าเดิมก่อนเพิ่มหรือลด</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+                        <div>
+                            <label for="percentage-original-final" class="block text-slate-700 font-bold mb-2">ป้อนค่าสุดท้าย (หลังเพิ่ม/ลด):</label>
+                            <input type="number" id="percentage-original-final" oninput="handlePercentageCalculations()" class="input-field w-full p-3 border border-gray-300" placeholder="ตัวอย่าง: 550">
+                        </div>
+                        <div>
+                            <label for="percentage-original-percent" class="block text-slate-700 font-bold mb-2">ป้อนเปอร์เซ็นต์ที่เพิ่ม/ลด:</label>
+                            <input type="number" id="percentage-original-percent" oninput="handlePercentageCalculations()" class="input-field w-full p-3 border border-gray-300" placeholder="ตัวอย่าง: 10 (ถ้าเพิ่ม)">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label for="percentage-original-output" class="block text-slate-700 font-bold mb-2">ผลลัพธ์ (ค่าเริ่มต้น):</label>
+                            <input type="text" id="percentage-original-output" class="output-field w-full p-3 border border-gray-300 bg-gray-100 cursor-not-allowed" readonly>
+                        </div>
+                        <div class="sm:col-span-2 mt-2">
+                            <p class="text-sm text-gray-500">หมายเหตุ: ใส่ค่าเปอร์เซ็นต์เป็นบวกสำหรับการเพิ่ม และลบสำหรับการลด</p>
+                            <p class="text-sm text-gray-500">ตัวอย่าง: **550** มาจากค่าตั้งต้นที่เพิ่มขึ้น **10%** คือเท่าไหร่?</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Temperature Converter -->
+            <div id="temperature-converter" class="converter-section hidden" role="tabpanel">
+                <h2 class="text-3xl font-bold text-center text-slate-700 mb-8 section-header">แปลงอุณหภูมิ</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label for="temperature-input" class="block text-slate-700 font-bold mb-2">ป้อนค่า:</label>
+                        <input type="number" id="temperature-input" oninput="convertTemperature()" class="input-field w-full p-3 border border-gray-300" placeholder="ตัวอย่าง: 25">
+                    </div>
+                    <div>
+                        <label for="temperature-from-unit" class="block text-slate-700 font-bold mb-2">จากหน่วย:</label>
+                        <select id="temperature-from-unit" onchange="convertTemperature()" class="input-field w-full p-3 border border-gray-300">
+                            <option value="celsius">เซลเซียส (°C)</option>
+                            <option value="fahrenheit">ฟาเรนไฮต์ (°F)</option>
+                            <option value="kelvin">เคลวิน (K)</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="temperature-to-unit" class="block text-slate-700 font-bold mb-2">ถึงหน่วย:</label>
+                        <select id="temperature-to-unit" onchange="convertTemperature()" class="input-field w-full p-3 border border-gray-300">
+                            <option value="celsius">เซลเซียส (°C)</option>
+                            <option value="fahrenheit">ฟาเรนไฮต์ (°F)</option>
+                            <option value="kelvin">เคลวิน (K)</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="temperature-output" class="block text-slate-700 font-bold mb-2">ผลลัพธ์:</label>
+                        <input type="text" id="temperature-output" class="output-field w-full p-3 border border-gray-300 bg-gray-100 cursor-not-allowed" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BMI Calculator -->
+            <div id="bmi-converter" class="converter-section hidden" role="tabpanel">
+                <h2 class="text-3xl font-bold text-center text-slate-700 mb-8 section-header">คำนวณค่า BMI</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label for="bmi-weight" class="block text-slate-700 font-bold mb-2">น้ำหนัก (กิโลกรัม):</label>
+                        <input type="number" id="bmi-weight" oninput="calculateBMI()" class="input-field w-full p-3 border border-gray-300" placeholder="ป้อนน้ำหนัก">
+                    </div>
+                    <div>
+                        <label for="bmi-height" class="block text-slate-700 font-bold mb-2">ส่วนสูง (เซนติเมตร):</label>
+                        <input type="number" id="bmi-height" oninput="calculateBMI()" class="input-field w-full p-3 border border-gray-300" placeholder="ป้อนส่วนสูง">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="bmi-result" class="block text-slate-700 font-bold mb-2">ผลลัพธ์ BMI:</label>
+                        <input type="text" id="bmi-result" class="output-field w-full p-3 border border-gray-300 bg-gray-100 cursor-not-allowed" readonly>
+                    </div>
+                    <div class="sm:col-span-2 mt-4">
+                        <h3 class="text-xl font-bold text-center text-slate-700 mb-2">สถานะ:</h3>
+                        <p id="bmi-status" class="text-center font-semibold text-lg text-gray-600"></p>
+                    </div>
+                    <!-- New Gemini API feature -->
+                    <div class="sm:col-span-2 mt-6 text-center">
+                        <button onclick="getAIAdvice()" id="ai-advice-btn" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-full hover:bg-blue-700 transition-colors duration-300 shadow-lg hover:shadow-xl">
+                            รับคำแนะนำจาก AI ✨
+                        </button>
+                    </div>
+                    <div class="sm:col-span-2 mt-6">
+                        <div id="ai-advice-result" class="p-6 bg-blue-50 rounded-lg hidden">
+                            <h3 class="text-lg font-bold text-blue-800 mb-2">คำแนะนำจาก Gemini</h3>
+                            <p id="advice-text" class="text-slate-700"></p>
+                            <div id="loading-indicator" class="text-center mt-4 hidden">
+                                <div class="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+                                <p class="mt-2 text-blue-600">กำลังสร้างคำแนะนำ...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- BMI Criteria Section -->
+                <div class="mt-8 p-6 bg-gray-100 rounded-lg">
+                    <h3 class="text-xl font-bold text-slate-700 mb-4">เกณฑ์การประเมินค่า BMI</h3>
+                    <ul class="list-disc list-inside space-y-2 text-slate-600">
+                        <li>BMI ต่ำกว่า 18.5: น้ำหนักต่ำกว่าเกณฑ์</li>
+                        <li>BMI 18.5 - 24.9: น้ำหนักปกติ</li>
+                        <li>BMI 25.0 - 29.9: น้ำหนักเกินเกณฑ์</li>
+                        <li>BMI 30.0 ขึ้นไป: โรคอ้วน</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Ad Slot - Bottom -->
+            <!-- Note: Replace this entire div with your actual ad code from the ad network. -->
+            <div class="my-6 text-center">
+                <div class="mock-ad border-2 border-dashed border-gray-400">
+                    <p class="text-xl font-semibold text-gray-700">พื้นที่โฆษณา</p>
+                    <p class="text-sm mt-2 text-gray-500">ขนาด 728x90 พิกเซล (โค้ดโฆษณาจริงจะแสดงที่นี่)</p>
+                </div>
+            </div>
+
+        </main>
+        
+        <footer class="text-center mt-12 text-slate-500">
+            <p>&copy; 2024 เครื่องมืออเนกประสงค์</p>
+        </footer>
+    </div>
+    
+    <script>
+        const converters = {
+            length: {
+                baseUnit: 'm',
+                rates: {
+                    km: 1000,
+                    m: 1,
+                    cm: 0.01,
+                    mm: 0.001,
+                    mile: 1609.34,
+                    yd: 0.9144,
+                    ft: 0.3048,
+                    in: 0.0254
+                }
+            },
+            weight: {
+                baseUnit: 'kg',
+                rates: {
+                    tonne: 1000,
+                    kg: 1,
+                    g: 0.001,
+                    mg: 0.000001,
+                    lb: 0.453592,
+                    oz: 0.0283495
+                }
+            }
+        };
+        
+        function showConverter(converterId, buttonElement) {
+            const sections = document.querySelectorAll('.converter-section');
+            sections.forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(`${converterId}-converter`).classList.remove('hidden');
+
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (buttonElement) {
+                buttonElement.classList.add('active');
+            } else {
+                // Default to the first button if no element is passed
+                document.getElementById('tab-length').classList.add('active');
+            }
+
+            // Recalculate for the newly shown converter
+            if (converterId === 'length') convertLength();
+            if (converterId === 'weight') convertWeight();
+            if (converterId === 'percentage') handlePercentageCalculations();
+            if (converterId === 'temperature') convertTemperature();
+            if (converterId === 'bmi') calculateBMI();
+        }
+
+        // Initialize UI on load
+        document.addEventListener('DOMContentLoaded', () => {
+            showConverter('length', document.getElementById('tab-length'));
+        });
+        
+        function convertLength() {
+            const inputValue = parseFloat(document.getElementById('length-input').value);
+            if (isNaN(inputValue)) {
+                document.getElementById('length-output').value = '';
+                return;
+            }
+
+            const fromUnit = document.getElementById('length-from-unit').value;
+            const toUnit = document.getElementById('length-to-unit').value;
+            
+            const baseValueInMeters = inputValue * converters.length.rates[fromUnit];
+            const result = baseValueInMeters / converters.length.rates[toUnit];
+            document.getElementById('length-output').value = result.toFixed(4); 
+        }
+
+        function convertWeight() {
+            const inputValue = parseFloat(document.getElementById('weight-input').value);
+            if (isNaN(inputValue)) {
+                document.getElementById('weight-output').value = '';
+                return;
+            }
+
+            const fromUnit = document.getElementById('weight-from-unit').value;
+            const toUnit = document.getElementById('weight-to-unit').value;
+
+            const baseValueInKg = inputValue * converters.weight.rates[fromUnit];
+            const result = baseValueInKg / converters.weight.rates[toUnit];
+            document.getElementById('weight-output').value = result.toFixed(4);
+        }
+
+        /**
+         * Master function to trigger all percentage calculations.
+         * This is called on any input change in the percentage section.
+         */
+        function handlePercentageCalculations() {
+            calculateSharePercentage();
+            calculatePercentChange();
+            calculateOriginalValue();
+        }
+
+        /**
+         * Calculates the percentage that one value is of another.
+         */
+        function calculateSharePercentage() {
+            const value1 = parseFloat(document.getElementById('percentage-share-input-1').value);
+            const value2 = parseFloat(document.getElementById('percentage-share-input-2').value);
+            const outputEl = document.getElementById('percentage-share-output');
+
+            if (isNaN(value1) || isNaN(value2) || value2 === 0) {
+                outputEl.textContent = '0';
+                return;
+            }
+            const result = (value1 / value2) * 100;
+            outputEl.textContent = result.toFixed(2);
+        }
+
+        /**
+         * Calculates a value after a percentage increase or decrease.
+         */
+        function calculatePercentChange() {
+            const value = parseFloat(document.getElementById('percentage-change-input').value);
+            const percent = parseFloat(document.getElementById('percentage-change-percent').value);
+            const outputEl = document.getElementById('percentage-change-output');
+
+            if (isNaN(value) || isNaN(percent)) {
+                outputEl.value = '';
+                return;
+            }
+
+            const result = value + (value * percent / 100);
+            outputEl.value = result.toFixed(2);
+        }
+
+        /**
+         * Calculates the original value before a percentage change.
+         */
+        function calculateOriginalValue() {
+            const finalValue = parseFloat(document.getElementById('percentage-original-final').value);
+            const percentChange = parseFloat(document.getElementById('percentage-original-percent').value);
+            const outputEl = document.getElementById('percentage-original-output');
+
+            if (isNaN(finalValue) || isNaN(percentChange)) {
+                outputEl.value = '';
+                return;
+            }
+
+            const result = finalValue / (1 + (percentChange / 100));
+            outputEl.value = result.toFixed(2);
+        }
+
+        function convertTemperature() {
+            const inputValue = parseFloat(document.getElementById('temperature-input').value);
+            if (isNaN(inputValue)) {
+                document.getElementById('temperature-output').value = '';
+                return;
+            }
+
+            const fromUnit = document.getElementById('temperature-from-unit').value;
+            const toUnit = document.getElementById('temperature-to-unit').value;
+            let result;
+
+            if (fromUnit === toUnit) {
+                result = inputValue;
+            } else if (fromUnit === 'celsius') {
+                if (toUnit === 'fahrenheit') {
+                    result = (inputValue * 9/5) + 32;
+                } else if (toUnit === 'kelvin') {
+                    result = inputValue + 273.15;
+                }
+            } else if (fromUnit === 'fahrenheit') {
+                if (toUnit === 'celsius') {
+                    result = (inputValue - 32) * 5/9;
+                } else if (toUnit === 'kelvin') {
+                    result = (inputValue - 32) * 5/9 + 273.15;
+                }
+            } else if (fromUnit === 'kelvin') {
+                if (toUnit === 'celsius') {
+                    result = inputValue - 273.15;
+                } else if (toUnit === 'fahrenheit') {
+                    result = (inputValue - 273.15) * 9/5 + 32;
+                }
+            }
+
+            document.getElementById('temperature-output').value = result.toFixed(2);
+        }
+
+        function calculateBMI() {
+            const weight = parseFloat(document.getElementById('bmi-weight').value);
+            // Convert height from centimeters to meters
+            const heightCm = parseFloat(document.getElementById('bmi-height').value);
+            const heightM = heightCm / 100;
+
+            const resultEl = document.getElementById('bmi-result');
+            const statusEl = document.getElementById('bmi-status');
+
+            if (isNaN(weight) || isNaN(heightCm) || heightCm <= 0) {
+                resultEl.value = '';
+                statusEl.textContent = '';
+                return;
+            }
+
+            const bmi = weight / (heightM * heightM);
+            resultEl.value = bmi.toFixed(2);
+            
+            if (bmi < 18.5) {
+                statusEl.textContent = 'น้ำหนักต่ำกว่าเกณฑ์';
+                statusEl.className = 'text-center font-semibold text-lg text-blue-600';
+            } else if (bmi >= 18.5 && bmi < 24.9) {
+                statusEl.textContent = 'น้ำหนักปกติ';
+                statusEl.className = 'text-center font-semibold text-lg text-green-600';
+            } else if (bmi >= 25 && bmi < 29.9) {
+                statusEl.textContent = 'น้ำหนักเกินเกณฑ์';
+                statusEl.className = 'text-center font-semibold text-lg text-yellow-600';
+            } else {
+                statusEl.textContent = 'โรคอ้วน';
+                statusEl.className = 'text-center font-semibold text-lg text-red-600';
+            }
+        }
+        
+        async function getAIAdvice() {
+            const bmiStatus = document.getElementById('bmi-status').textContent;
+            const adviceResultEl = document.getElementById('ai-advice-result');
+            const adviceTextEl = document.getElementById('advice-text');
+            const loadingIndicator = document.getElementById('loading-indicator');
+
+            // Show loading indicator and hide previous results
+            adviceResultEl.classList.remove('hidden');
+            adviceTextEl.textContent = '';
+            loadingIndicator.classList.remove('hidden');
+
+            const systemPrompt = "คุณคือผู้เชี่ยวชาญด้านสุขภาพที่ให้คำแนะนำที่เป็นมิตรและเข้าใจง่ายแก่ผู้คน โปรดให้คำแนะนำด้านสุขภาพสั้นๆ ในรูปแบบย่อหน้าเดียวตามสถานะ BMI ที่ผู้ใช้ได้รับ";
+            const userQuery = `โปรดให้คำแนะนำด้านสุขภาพสำหรับสถานะ BMI นี้: "${bmiStatus}"`;
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                tools: [{ "google_search": {} }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API response was not ok: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+                let text = "ขออภัย ไม่สามารถสร้างคำแนะนำได้ในขณะนี้";
+
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    text = candidate.content.parts[0].text;
+                }
+                
+                adviceTextEl.textContent = text;
+            } catch (error) {
+                console.error("Error fetching AI advice:", error);
+                adviceTextEl.textContent = "เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง";
+            } finally {
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
